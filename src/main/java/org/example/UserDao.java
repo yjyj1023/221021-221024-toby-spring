@@ -18,6 +18,35 @@ public class UserDao {
         this.connectionMaker = new AWSConnectionMaker();
     }
 
+    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException{
+        Connection c = null;
+        PreparedStatement ps = null;
+        try {
+            c = connectionMaker.getConnection();
+            ps = new DeleteAllStrategy().makePreparedStatement(c);
+
+            ps.executeUpdate();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if(ps != null){
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                }
+            }
+
+            if(c != null){
+                try {
+                    c.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
+    }
+
     public void add(User user) throws SQLException, ClassNotFoundException {
         Connection c = null;
         PreparedStatement ps = null;
@@ -40,13 +69,18 @@ public class UserDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            try {
-                ps.close();
-            } catch (SQLException e) {
+            if(ps != null){
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                }
             }
-            try {
-                c.close();
-            } catch (SQLException e) {
+
+            if(c != null){
+                try {
+                    c.close();
+                } catch (SQLException e) {
+                }
             }
         }
     }
@@ -82,46 +116,34 @@ public class UserDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            try {
-                rs.close();
-            } catch (SQLException e) {
+            if(rs != null){
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                }
             }
-            try {
-                ps.close();
-            } catch (SQLException e) {
+            if(ps != null){
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                }
             }
-            try {
-                c.close();
-            } catch (SQLException e) {
+
+            if(c != null){
+                try {
+                    c.close();
+                } catch (SQLException e) {
+                }
             }
         }
     }
 
     public void deleteAll() throws SQLException, ClassNotFoundException {
 
-        Connection c = null;
-        PreparedStatement ps = null;
+        StatementStrategy st = new DeleteAllStrategy();
+        jdbcContextWithStatementStrategy(st);
 
-        try {
-            c = connectionMaker.getConnection();
-            ps = new DeleteAllStrategy().makePreparedStatement(c);
 
-            ps.executeUpdate();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                ps.close();
-            } catch (SQLException e) {
-            }
-
-            try {
-                c.close();
-            } catch (SQLException e) {
-            }
-        }
     }
 
     public int getCount() throws SQLException, ClassNotFoundException {
@@ -143,17 +165,24 @@ public class UserDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            try {
-                rs.close();
-            } catch (SQLException e) {
+            if(rs != null){
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                }
             }
-            try {
-                ps.close();
-            } catch (SQLException e) {
+            if(ps != null){
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                }
             }
-            try {
-                c.close();
-            } catch (SQLException e) {
+
+            if(c != null){
+                try {
+                    c.close();
+                } catch (SQLException e) {
+                }
             }
         }
     }
