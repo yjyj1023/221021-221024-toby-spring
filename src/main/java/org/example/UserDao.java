@@ -19,54 +19,82 @@ public class UserDao {
     }
 
     public void add(User user) throws SQLException, ClassNotFoundException {
+        Connection c = null;
+        PreparedStatement ps = null;
 
-        //db접속
-        Connection c = connectionMaker.getConnection();
+        try {
+            //db접속
+            c = connectionMaker.getConnection();
 
-        //쿼리문 작성(insert)
-        PreparedStatement ps = c.prepareStatement("INSERT INTO users(id, name, password) VALUES(?,?,?)");
-        ps.setString(1, user.getID());
-        ps.setString(2, user.getName());
-        ps.setString(3, user.getPassword());
+            //쿼리문 작성(insert)
+            ps = c.prepareStatement("INSERT INTO users(id, name, password) VALUES(?,?,?)");
+            ps.setString(1, user.getID());
+            ps.setString(2, user.getName());
+            ps.setString(3, user.getPassword());
 
-        //status 확인하기
-//        int status = ps.executeUpdate();
-//        System.out.println(status);
+            //쿼리문 실행
+            ps.executeUpdate();
 
-        //쿼리문 실행
-        ps.executeUpdate();
-
-        //닫기
-        ps.close();
-        c.close();
-        System.out.println("DB연동 성공");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                ps.close();
+            } catch (SQLException e) {
+            }
+            try {
+                c.close();
+            } catch (SQLException e) {
+            }
+        }
     }
 
     public User get(String id) throws ClassNotFoundException, SQLException {
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-        //db접속
-        Connection c = connectionMaker.getConnection();
+        try {
+            //db접속
+            c = connectionMaker.getConnection();
 
-        //쿼리문 작성(select)
-        PreparedStatement ps = c.prepareStatement("SELECT id,name,password FROM users WHERE id = ?");
-        ps.setString(1, id);
+            //쿼리문 작성(select)
+            ps = c.prepareStatement("SELECT id,name,password FROM users WHERE id = ?");
+            ps.setString(1, id);
 
-        //executeQuery: resultset객체에 결과집합 담기, 주로 select문에서 실행
-        ResultSet rs = ps.executeQuery();
+            //executeQuery: resultset객체에 결과집합 담기, 주로 select문에서 실행
+            rs = ps.executeQuery();
 
-        User user = null;
-        //select문의 존재여부 확인(다음 행이 존재하면 true 리턴)
-        if(rs.next()){
-            user = new User(rs.getString("id"),
-                    rs.getString("name"), rs.getString("password"));
+            User user = null;
+            //select문의 존재여부 확인(다음 행이 존재하면 true 리턴)
+            if(rs.next()){
+                user = new User(rs.getString("id"),
+                        rs.getString("name"), rs.getString("password"));
+            }
+
+            if(user == null) throw new EmptyResultDataAccessException(1);
+            return user;
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                rs.close();
+            } catch (SQLException e) {
+            }
+            try {
+                ps.close();
+            } catch (SQLException e) {
+            }
+            try {
+                c.close();
+            } catch (SQLException e) {
+            }
         }
-
-        rs.close();
-        ps.close();
-        c.close();
-
-        if(user == null) throw new EmptyResultDataAccessException(1);
-        return user;
     }
 
     public void deleteAll() throws SQLException, ClassNotFoundException {
