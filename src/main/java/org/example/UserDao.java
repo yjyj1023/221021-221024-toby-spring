@@ -3,32 +3,32 @@ package org.example;
 import org.springframework.dao.EmptyResultDataAccessException;
 import user.User;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.Map;
 
 public class UserDao {
-    private ConnectionMaker connectionMaker;
+
+    private DataSource dataSource;
 
     public UserDao() {
-        this.connectionMaker = new AWSConnectionMaker();
+        this.dataSource = dataSource;
     }
 
-    public UserDao(ConnectionMaker connectionMaker) {
-
-        this.connectionMaker = connectionMaker;
+    public UserDao(DataSource dataSource) {
+        this.dataSource = dataSource; // 생성자도 변경
     }
+
 
     public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException{
         Connection c = null;
         PreparedStatement ps = null;
 
         try {
-            c = connectionMaker.getConnection();
+            c = dataSource.getConnection();
             ps = new DeleteAllStrategy().makePreparedStatement(c);
 
             ps.executeUpdate();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -60,7 +60,7 @@ public class UserDao {
 
         try {
             //db접속
-            c = connectionMaker.getConnection();
+            c = dataSource.getConnection();
 
             //쿼리문 작성(select)
             ps = c.prepareStatement("SELECT id,name,password FROM users WHERE id = ?");
@@ -79,8 +79,6 @@ public class UserDao {
             if(user == null) throw new EmptyResultDataAccessException(1);
             return user;
 
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -117,7 +115,7 @@ public class UserDao {
         ResultSet rs = null;
 
         try {
-            c = connectionMaker.getConnection();
+            c = dataSource.getConnection();
             ps = c.prepareStatement("select count(*) from users");
 
             rs = ps.executeQuery();
@@ -125,8 +123,6 @@ public class UserDao {
 
             return rs.getInt(1);
 
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
