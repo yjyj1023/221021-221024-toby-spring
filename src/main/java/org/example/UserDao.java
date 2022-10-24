@@ -9,18 +9,16 @@ import java.util.Map;
 
 public class UserDao {
 
-    private DataSource dataSource;
-
-    public UserDao() {
-        this.dataSource = dataSource;
-    }
+    private final DataSource dataSource;
+    private final JdbcContext jdbcContext;
 
     public UserDao(DataSource dataSource) {
         this.dataSource = dataSource; // 생성자도 변경
+        this.jdbcContext = new JdbcContext(dataSource);
     }
 
 
-    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException{
+    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
         Connection c = null;
         PreparedStatement ps = null;
 
@@ -32,14 +30,14 @@ public class UserDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if(ps != null){
+            if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
                 }
             }
 
-            if(c != null){
+            if (c != null) {
                 try {
                     c.close();
                 } catch (SQLException e) {
@@ -48,8 +46,8 @@ public class UserDao {
         }
     }
 
-    public void add(User user) throws SQLException {
-        jdbcContextWithStatementStrategy(new StatementStrategy() {
+    public void add(final User user) throws SQLException {
+        jdbcContext.workWithStatementStrategy(new StatementStrategy() {
             @Override
             public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
                 PreparedStatement pstmt = null;
@@ -61,6 +59,7 @@ public class UserDao {
             }
 
         });
+
 
     }
 
@@ -82,31 +81,31 @@ public class UserDao {
 
             User user = null;
             //select문의 존재여부 확인(다음 행이 존재하면 true 리턴)
-            if(rs.next()){
+            if (rs.next()) {
                 user = new User(rs.getString("id"),
                         rs.getString("name"), rs.getString("password"));
             }
 
-            if(user == null) throw new EmptyResultDataAccessException(1);
+            if (user == null) throw new EmptyResultDataAccessException(1);
             return user;
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if(rs != null){
+            if (rs != null) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
                 }
             }
-            if(ps != null){
+            if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
                 }
             }
 
-            if(c != null){
+            if (c != null) {
                 try {
                     c.close();
                 } catch (SQLException e) {
@@ -143,32 +142,25 @@ public class UserDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if(rs != null){
+            if (rs != null) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
                 }
             }
-            if(ps != null){
+            if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
                 }
             }
 
-            if(c != null){
+            if (c != null) {
                 try {
                     c.close();
                 } catch (SQLException e) {
                 }
             }
         }
-    }
-
-    public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        UserDao userDao = new UserDao();
-        userDao.add(new User("15", "Ruru", "1534qwer"));
-//        User user = userDao.get("1");
-//        System.out.println(user.getName());
     }
 }
