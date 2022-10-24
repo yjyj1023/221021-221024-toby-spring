@@ -17,35 +17,6 @@ public class UserDao {
         this.jdbcContext = new JdbcContext(dataSource);
     }
 
-
-    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
-        Connection c = null;
-        PreparedStatement ps = null;
-
-        try {
-            c = dataSource.getConnection();
-            ps = new DeleteAllStrategy().makePreparedStatement(c);
-
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-                }
-            }
-        }
-    }
-
     public void add(final User user) throws SQLException {
         jdbcContext.workWithStatementStrategy(new StatementStrategy() {
             @Override
@@ -115,14 +86,7 @@ public class UserDao {
     }
 
     public void deleteAll() throws SQLException {
-        jdbcContextWithStatementStrategy(new StatementStrategy() {
-            @Override
-            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
-                return c.prepareStatement("delete from users");
-            }
-        });
-
-
+        this.jdbcContext.executeSql("delete from users");
     }
 
     public int getCount() throws SQLException, ClassNotFoundException {
