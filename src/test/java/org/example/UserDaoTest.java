@@ -51,7 +51,7 @@ class UserDaoTest {
         Assertions.assertEquals(user1.getPassword(),user.getPassword());
 
     }
-
+//
     @Test
     void count() throws SQLException, ClassNotFoundException {
 
